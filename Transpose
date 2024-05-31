@@ -1,0 +1,44 @@
+/* Sample data creation */
+data stores;
+    input Date $ Dayofweek $ AppleStore MelonStore Currency $;
+    datalines;
+2024-01-01 Mon 1000 2000 Dollars
+2024-01-02 Tue 1500 2500 Dollars
+2024-01-01 Mon 100000 200000 Pennies
+2024-01-02 Tue 150000 250000 Pennies
+;
+run;
+
+/* Separate the data into two datasets based on Currency */
+data dollars pennies;
+    set stores;
+    if Currency = 'Dollars' then output dollars;
+    else if Currency = 'Pennies' then output pennies;
+run;
+
+/* Transpose the 'dollars' dataset */
+proc transpose data=dollars out=dollars_t(drop=_name_) name=StoreType;
+    by Date Dayofweek;
+    var AppleStore MelonStore;
+run;
+
+/* Transpose the 'pennies' dataset */
+proc transpose data=pennies out=pennies_t(drop=_name_) name=StoreType;
+    by Date Dayofweek;
+    var AppleStore MelonStore;
+run;
+
+/* Merge the transposed datasets */
+data final;
+    merge dollars_t(rename=(Col1=Dollars)) pennies_t(rename=(Col1=Pennies));
+    by Date Dayofweek StoreType;
+run;
+
+/* Sort the final dataset (optional) */
+proc sort data=final;
+    by Date Dayofweek StoreType;
+run;
+
+/* Print the final dataset to verify the result */
+proc print data=final;
+run;
