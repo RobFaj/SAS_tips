@@ -1,0 +1,2 @@
+select (select min(fail_date) from student_data where student_name = 'Bob' and pass_fail = 'Fail') - school_start_date as days_since_start_to_fail
+from (select min(date_column) as school_start_date from student_data);
